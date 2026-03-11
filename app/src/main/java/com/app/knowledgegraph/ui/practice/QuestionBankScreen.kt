@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.app.knowledgegraph.AppContainer
 import com.app.knowledgegraph.data.db.entity.FolderWithCount
+import com.app.knowledgegraph.ui.components.cardShadow3d
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -171,7 +172,7 @@ private fun FolderItem(
     var showMenu by remember { mutableStateOf(false) }
 
     Card(
-        modifier = Modifier
+        modifier = Modifier.cardShadow3d()
             .fillMaxWidth()
             .combinedClickable(
                 onClick = onClick,

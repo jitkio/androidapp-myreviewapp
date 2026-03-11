@@ -25,6 +25,8 @@ import com.app.knowledgegraph.ui.components.GhostButton
 import com.app.knowledgegraph.ui.components.NeutralTag
 import com.app.knowledgegraph.data.db.entity.ErrorType
 import com.app.knowledgegraph.ui.theme.*
+import com.app.knowledgegraph.ui.components.cardShadow3d
+import com.app.knowledgegraph.ui.components.buttonShadow3d
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -120,7 +122,7 @@ fun ReviewCard(
                         colors = CardDefaults.cardColors(
                             containerColor = Warning.copy(alpha = 0.15f)
                         ),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.cardShadow3d().fillMaxWidth()
                     ) {
                         MathView(
                             text = card.hint,
@@ -180,7 +182,7 @@ fun RatingButtons(
     Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(Spacing.space2)) {
         FilledTonalButton(
             onClick = { onRate(0) },
-            modifier = Modifier.weight(1f).height(ButtonSize.secondaryHeight),
+            modifier = Modifier.buttonShadow3d().weight(1f).height(ButtonSize.secondaryHeight),
             contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
             colors = ButtonDefaults.filledTonalButtonColors(
                 containerColor = Error.copy(alpha = 0.15f),
@@ -190,7 +192,7 @@ fun RatingButtons(
 
         FilledTonalButton(
             onClick = { onRate(2) },
-            modifier = Modifier.weight(1f).height(ButtonSize.secondaryHeight),
+            modifier = Modifier.buttonShadow3d().weight(1f).height(ButtonSize.secondaryHeight),
             contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
             colors = ButtonDefaults.filledTonalButtonColors(
                 containerColor = Warning.copy(alpha = 0.15f),
@@ -200,7 +202,7 @@ fun RatingButtons(
 
         FilledTonalButton(
             onClick = { onRate(3) },
-            modifier = Modifier.weight(1f).height(ButtonSize.secondaryHeight),
+            modifier = Modifier.buttonShadow3d().weight(1f).height(ButtonSize.secondaryHeight),
             contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
             colors = ButtonDefaults.filledTonalButtonColors(
                 containerColor = Secondary.copy(alpha = 0.15f),
@@ -210,7 +212,7 @@ fun RatingButtons(
 
         FilledTonalButton(
             onClick = { onRate(5) },
-            modifier = Modifier.weight(1f).height(ButtonSize.secondaryHeight),
+            modifier = Modifier.buttonShadow3d().weight(1f).height(ButtonSize.secondaryHeight),
             contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
             colors = ButtonDefaults.filledTonalButtonColors(
                 containerColor = Primary.copy(alpha = 0.15f),

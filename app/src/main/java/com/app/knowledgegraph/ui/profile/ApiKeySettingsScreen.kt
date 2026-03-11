@@ -16,6 +16,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.app.knowledgegraph.data.preferences.SettingsDataStore
 import kotlinx.coroutines.launch
+import com.app.knowledgegraph.ui.components.buttonShadow3d
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -146,7 +147,7 @@ fun ApiKeySettingsScreen(
                         showSnackbar = true
                     }
                 },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.buttonShadow3d().fillMaxWidth(),
                 enabled = keyInput.isNotBlank()
             ) {
                 Text("保存")

@@ -17,6 +17,7 @@ import com.app.knowledgegraph.AppContainer
 import com.app.knowledgegraph.data.db.entity.Card
 import com.app.knowledgegraph.data.db.entity.RelationType
 import kotlinx.coroutines.launch
+import com.app.knowledgegraph.ui.components.cardShadow3d
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -129,7 +130,7 @@ fun AddEdgeScreen(
                 items(filteredCards, key = { it.id }) { card ->
                     val isSelected = selectedTarget?.id == card.id
                     Card(
-                        modifier = Modifier
+                        modifier = Modifier.cardShadow3d()
                             .fillMaxWidth()
                             .clickable { selectedTarget = card },
                         colors = CardDefaults.cardColors(

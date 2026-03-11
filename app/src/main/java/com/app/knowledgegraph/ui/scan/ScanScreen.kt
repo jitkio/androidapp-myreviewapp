@@ -37,6 +37,8 @@ import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.app.knowledgegraph.ui.components.cardShadow3d
+import com.app.knowledgegraph.ui.components.buttonShadow3d
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -243,7 +245,7 @@ private fun IdlePhase(
             // Processing overlay
             if (uiState.isProcessing) {
                 Card(
-                    modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)
+                    modifier = Modifier.cardShadow3d().align(Alignment.BottomCenter).padding(16.dp)
                 ) {
                     Column(
                         modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -262,7 +264,7 @@ private fun IdlePhase(
             uiState.error?.let { error ->
                 Card(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
-                    modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)
+                    modifier = Modifier.cardShadow3d().align(Alignment.BottomCenter).padding(16.dp)
                 ) {
                     Text(error, modifier = Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onErrorContainer)
                 }
@@ -292,7 +294,7 @@ private fun IdlePhase(
                 Button(
                     onClick = onCamera,
                     enabled = !uiState.isProcessing,
-                    modifier = Modifier.size(72.dp),
+                    modifier = Modifier.buttonShadow3d().size(72.dp),
                     shape = CircleShape,
                     contentPadding = PaddingValues(0.dp)
                 ) {
@@ -348,7 +350,7 @@ private fun PreviewPhase(
 
         Button(
             onClick = onSave,
-            modifier = Modifier.fillMaxWidth().padding(16.dp).height(52.dp),
+            modifier = Modifier.buttonShadow3d().fillMaxWidth().padding(16.dp).height(52.dp),
             enabled = uiState.selectedIndices.isNotEmpty()
         ) {
             Text("保存选中的 ${uiState.selectedIndices.size} 道题")

@@ -26,6 +26,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.app.knowledgegraph.AppContainer
 import com.app.knowledgegraph.domain.practice.ConditionCheck
 import com.app.knowledgegraph.domain.practice.PracticeQuestion
+import com.app.knowledgegraph.ui.components.cardShadow3d
+import com.app.knowledgegraph.ui.components.buttonShadow3d
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,7 +115,7 @@ fun QuestionPhase(question: PracticeQuestion, onSubmit: (String) -> Unit) {
         question.methods.forEach { method ->
             val isSelected = selected == method
             Card(
-                modifier = Modifier
+                modifier = Modifier.cardShadow3d()
                     .fillMaxWidth()
                     .clickable { selected = method }
                     .then(
@@ -140,7 +142,7 @@ fun QuestionPhase(question: PracticeQuestion, onSubmit: (String) -> Unit) {
 
         Button(
             onClick = { selected?.let { onSubmit(it) } },
-            modifier = Modifier.fillMaxWidth().height(52.dp),
+            modifier = Modifier.buttonShadow3d().fillMaxWidth().height(52.dp),
             enabled = selected != null
         ) { Text("确认选择", style = MaterialTheme.typography.titleSmall) }
     }
@@ -297,7 +299,7 @@ fun FeedbackPhase(
 
         Button(
             onClick = onNext,
-            modifier = Modifier.fillMaxWidth().height(52.dp)
+            modifier = Modifier.buttonShadow3d().fillMaxWidth().height(52.dp)
         ) { Text("下一题", style = MaterialTheme.typography.titleSmall) }
 
         Spacer(modifier = Modifier.height(16.dp))

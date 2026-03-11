@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.app.knowledgegraph.ui.components.cardShadow3d
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -201,7 +202,7 @@ fun QuestionDetailScreen(
                     options.forEachIndexed { index, option ->
                         val label = ('A' + index).toString()
                         Card(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.cardShadow3d().fillMaxWidth(),
                             colors = CardDefaults.cardColors(
                                 containerColor = if (currentQuestion.answer.contains(label))
                                     MaterialTheme.colorScheme.primaryContainer

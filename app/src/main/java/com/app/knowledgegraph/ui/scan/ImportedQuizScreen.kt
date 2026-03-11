@@ -23,6 +23,8 @@ import com.app.knowledgegraph.data.db.entity.ImportedQuestion
 import com.app.knowledgegraph.data.db.entity.QuestionType
 import com.app.knowledgegraph.ui.components.MathView
 import org.json.JSONArray
+import com.app.knowledgegraph.ui.components.cardShadow3d
+import com.app.knowledgegraph.ui.components.buttonShadow3d
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -138,7 +140,7 @@ private fun SetupPhase(
 
         QuizMode.entries.forEach { mode ->
             Card(
-                modifier = Modifier.fillMaxWidth().clickable { onModeChange(mode) },
+                modifier = Modifier.cardShadow3d().fillMaxWidth().clickable { onModeChange(mode) },
                 colors = CardDefaults.cardColors(
                     containerColor = if (uiState.quizMode == mode) MaterialTheme.colorScheme.primaryContainer
                     else MaterialTheme.colorScheme.surfaceContainerLow
@@ -181,7 +183,7 @@ private fun SetupPhase(
 
         Button(
             onClick = onStart,
-            modifier = Modifier.fillMaxWidth().height(52.dp),
+            modifier = Modifier.buttonShadow3d().fillMaxWidth().height(52.dp),
             enabled = uiState.quizMode != QuizMode.BY_SOURCE || uiState.selectedSource.isNotBlank()
         ) { Text("开始刷题", style = MaterialTheme.typography.titleSmall) }
     }
@@ -239,7 +241,7 @@ private fun AnsweringPhase(
 
         Button(
             onClick = onSubmit,
-            modifier = Modifier.fillMaxWidth().padding(16.dp).height(52.dp),
+            modifier = Modifier.buttonShadow3d().fillMaxWidth().padding(16.dp).height(52.dp),
             enabled = when (question.type) {
                 QuestionType.MULTI_CHOICE -> userMultiAnswer.isNotEmpty()
                 else -> userAnswer.isNotBlank()
@@ -254,7 +256,7 @@ private fun SingleChoiceInput(options: List<String>, selected: String, onSelect:
         val letter = option.firstOrNull()?.toString() ?: ""
         val isSelected = selected == letter
         Card(
-            modifier = Modifier.fillMaxWidth().clickable { onSelect(letter) },
+            modifier = Modifier.cardShadow3d().fillMaxWidth().clickable { onSelect(letter) },
             colors = CardDefaults.cardColors(
                 containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer
                 else MaterialTheme.colorScheme.surfaceContainerLow
@@ -276,7 +278,7 @@ private fun MultiChoiceInput(options: List<String>, selected: Set<String>, onTog
         val letter = option.firstOrNull()?.toString() ?: ""
         val isSelected = selected.contains(letter)
         Card(
-            modifier = Modifier.fillMaxWidth().clickable { onToggle(letter) },
+            modifier = Modifier.cardShadow3d().fillMaxWidth().clickable { onToggle(letter) },
             colors = CardDefaults.cardColors(
                 containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer
                 else MaterialTheme.colorScheme.surfaceContainerLow
@@ -297,7 +299,7 @@ private fun TrueFalseInput(selected: String, onSelect: (String) -> Unit) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         Button(
             onClick = { onSelect("TRUE") },
-            modifier = Modifier.weight(1f).height(64.dp),
+            modifier = Modifier.buttonShadow3d().weight(1f).height(64.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = if (selected == "TRUE") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHigh,
                 contentColor = if (selected == "TRUE") MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
@@ -309,7 +311,7 @@ private fun TrueFalseInput(selected: String, onSelect: (String) -> Unit) {
         }
         Button(
             onClick = { onSelect("FALSE") },
-            modifier = Modifier.weight(1f).height(64.dp),
+            modifier = Modifier.buttonShadow3d().weight(1f).height(64.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = if (selected == "FALSE") MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceContainerHigh,
                 contentColor = if (selected == "FALSE") MaterialTheme.colorScheme.onError else MaterialTheme.colorScheme.onSurface

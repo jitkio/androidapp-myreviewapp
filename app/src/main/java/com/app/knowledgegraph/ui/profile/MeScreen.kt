@@ -1,6 +1,5 @@
 ﻿package com.app.knowledgegraph.ui.profile
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -13,13 +12,15 @@ import androidx.compose.ui.unit.dp
 import com.app.knowledgegraph.AppContainer
 import com.app.knowledgegraph.ui.theme.*
 import com.app.knowledgegraph.ui.components.StandardCard
+import com.app.knowledgegraph.ui.components.staticShadow3d
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MeScreen(
     container: AppContainer,
     onNavigateToSettings: () -> Unit = {},
-    onNavigateToApiKeySettings: () -> Unit = {}
+    onNavigateToApiKeySettings: () -> Unit = {},
+    onNavigateToSubjectManage: () -> Unit = {}
 ) {
     val totalCards by container.cardRepository.observeCount().collectAsState(initial = 0)
     val totalReviews by container.reviewDao.observeTotalReviews().collectAsState(initial = 0)
@@ -34,9 +35,7 @@ fun MeScreen(
         )
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(Spacing.space4),
+            modifier = Modifier.fillMaxSize().padding(Spacing.space4),
             verticalArrangement = Arrangement.spacedBy(Spacing.space4)
         ) {
             Text("学习概况", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
@@ -67,39 +66,39 @@ fun MeScreen(
 
             HorizontalDivider()
 
-            StandardCard(
-                onClick = onNavigateToSettings,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+            StandardCard(onClick = onNavigateToSettings, modifier = Modifier.fillMaxWidth()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Settings, null, tint = Primary)
                     Spacer(modifier = Modifier.width(Spacing.space3))
                     Column(modifier = Modifier.weight(1f)) {
                         Text("复习设置", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
-                        Text("调整每日学习量、记忆曲线参数", style = MaterialTheme.typography.bodySmall,
-                            color = TextSecondary)
+                        Text("调整每日学习量、记忆曲线参数", style = MaterialTheme.typography.bodySmall, color = TextSecondary)
                     }
                     Icon(Icons.Default.ChevronRight, null, tint = TextSecondary)
                 }
             }
 
-            StandardCard(
-                onClick = onNavigateToApiKeySettings,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+            StandardCard(onClick = onNavigateToApiKeySettings, modifier = Modifier.fillMaxWidth()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Key, null, tint = Primary)
                     Spacer(modifier = Modifier.width(Spacing.space3))
                     Column(modifier = Modifier.weight(1f)) {
                         Text("API Key 设置", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
-                        Text("配置 DeepSeek API Key 用于扫题识别", style = MaterialTheme.typography.bodySmall,
-                            color = TextSecondary)
+                        Text("配置 DeepSeek API Key 用于扫题识别", style = MaterialTheme.typography.bodySmall, color = TextSecondary)
                     }
                     Icon(Icons.Default.ChevronRight, null)
+                }
+            }
+
+            StandardCard(onClick = onNavigateToSubjectManage, modifier = Modifier.fillMaxWidth()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.School, null, tint = Primary)
+                    Spacer(modifier = Modifier.width(Spacing.space3))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("学科管理", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                        Text("添加或删除扫描时可选的学科", style = MaterialTheme.typography.bodySmall, color = TextSecondary)
+                    }
+                    Icon(Icons.Default.ChevronRight, null, tint = TextSecondary)
                 }
             }
         }
@@ -109,9 +108,10 @@ fun MeScreen(
 @Composable
 fun StatCard(label: String, value: String, modifier: Modifier = Modifier) {
     Card(
-        modifier = modifier,
+        modifier = modifier.staticShadow3d(elevation = 5.dp, cornerRadius = CornerRadius.card),
         colors = CardDefaults.cardColors(containerColor = BgCard),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(CornerRadius.card)
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(CornerRadius.card),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(Spacing.space4),
@@ -120,8 +120,7 @@ fun StatCard(label: String, value: String, modifier: Modifier = Modifier) {
             Text(value, style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold, color = Primary)
             Spacer(modifier = Modifier.height(Spacing.space1))
-            Text(label, style = MaterialTheme.typography.bodySmall,
-                color = TextSecondary)
+            Text(label, style = MaterialTheme.typography.bodySmall, color = TextSecondary)
         }
     }
 }

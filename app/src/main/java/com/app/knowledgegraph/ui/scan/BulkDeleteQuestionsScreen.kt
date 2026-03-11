@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import com.app.knowledgegraph.ui.components.buttonShadow3d
 
 private enum class DeleteMode { ALL, BY_DATE, BY_SOURCE }
 
@@ -87,7 +88,7 @@ fun BulkDeleteQuestionsScreen(
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.error
                         ),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.buttonShadow3d().fillMaxWidth()
                     ) {
                         Text("删除")
                     }

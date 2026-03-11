@@ -7,12 +7,15 @@ import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
@@ -37,12 +40,12 @@ import kotlin.math.sqrt
 fun MapScreen(
     container: AppContainer,
     appNavState: AppNavState,
+    onNavigateBack: () -> Unit = {},
     viewModel: MapViewModel = viewModel(factory = MapViewModel.factory(container))
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val density = LocalDensity.current
 
-    // Cached Paint object to avoid GC pressure
     val labelPaint = remember {
         android.graphics.Paint().apply {
             color = android.graphics.Color.argb(220, 50, 55, 70)
@@ -54,7 +57,6 @@ fun MapScreen(
     LaunchedEffect(Unit) {
         var lastTime = System.nanoTime()
         while (true) {
-            // 当物理已稳定时降频到 2fps 节省电量，交互时恢复 60fps
             if (viewModel.isSettled.value) {
                 delay(500)
             }
@@ -66,16 +68,22 @@ fun MapScreen(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize().background(BgBase)) {
+    Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
-            title = { Text("Map", style = MaterialTheme.typography.titleLarge, color = TextPrimary) },
+            title = { Text("知识图谱", style = MaterialTheme.typography.titleLarge, color = TextPrimary) },
             windowInsets = WindowInsets(0),
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = BgBase)
+            navigationIcon = {
+                IconButton(onClick = onNavigateBack) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "返回")
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
         )
 
         Row(
             modifier = Modifier
                 .horizontalScroll(rememberScrollState())
+                .background(Color.White)
                 .padding(horizontal = Spacing.space3, vertical = Spacing.space1),
             horizontalArrangement = Arrangement.spacedBy(Spacing.space2)
         ) {
@@ -112,7 +120,6 @@ fun MapScreen(
                 Canvas(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(BgBase)
                         .pointerInput(Unit) {
                             detectTransformGestures { _, pan, zoom, _ ->
                                 viewModel.onPanDelta(pan.x, pan.y)
@@ -135,16 +142,15 @@ fun MapScreen(
                             }
                         }
                 ) {
-                    // Reading Compose State here triggers only Canvas redraw
                     val scale = viewModel.scale.floatValue
                     val cx = viewModel.camX.floatValue
                     val cy = viewModel.camY.floatValue
                     val ft = viewModel.frameTime.longValue
                     val tick = viewModel.frameTick.longValue
 
-                    drawGrid(scale, cx, cy)
+                    // ★ Canvas 画布方格背景
+                    drawCanvasGrid(scale, cx, cy)
 
-                    // Draw edges
                     edges.forEach { de ->
                         val src = nodes[de.sourceIndex]
                         val tgt = nodes[de.targetIndex]
@@ -158,7 +164,6 @@ fun MapScreen(
                         drawLine(color = edgeColor.copy(alpha = 0.6f), start = Offset(x1, y1), end = Offset(x2, y2), strokeWidth = 1f * scale)
                     }
 
-                    // Draw particles
                     particles.forEach { p ->
                         if (p.edgeIndex < edges.size) {
                             val de = edges[p.edgeIndex]
@@ -177,7 +182,6 @@ fun MapScreen(
                         }
                     }
 
-                    // Draw nodes - set shadow/textSize once before loop
                     labelPaint.textSize = 10.5f * scale * density.density
                     labelPaint.setShadowLayer(4f * scale, 0f, 0f, android.graphics.Color.argb(40, 0, 0, 0))
 
@@ -191,7 +195,6 @@ fun MapScreen(
 
                         val pulsePhase = ((ft / 1500.0) + node.card.id * 0.3).let { kotlin.math.sin(it) }.toFloat()
 
-                        // Simplified glow: 2 layers instead of 3
                         drawCircle(color = nodeColor.copy(alpha = 0.08f), radius = baseRadius * 2.5f, center = Offset(sx, sy))
                         drawCircle(color = nodeColor.copy(alpha = 0.15f), radius = baseRadius * 1.4f, center = Offset(sx, sy))
 
@@ -199,14 +202,14 @@ fun MapScreen(
                             drawCircle(color = Color.White.copy(alpha = 0.15f), radius = baseRadius * 2.5f, center = Offset(sx, sy))
                         }
 
-                        drawCircle(color = BgBase.copy(alpha = 0.7f), radius = baseRadius, center = Offset(sx, sy))
+                        // 白色填充底 — 在画布网格上更突出
+                        drawCircle(color = Color.White.copy(alpha = 0.85f), radius = baseRadius, center = Offset(sx, sy))
                         drawCircle(color = nodeColor.copy(alpha = 0.8f), radius = baseRadius, center = Offset(sx, sy), style = Stroke(width = 2f * scale))
                         drawCircle(color = nodeColor.copy(alpha = 0.12f), radius = baseRadius, center = Offset(sx, sy))
 
                         val dotRadius = 3.5f * scale
                         drawCircle(color = nodeColor.copy(alpha = 0.7f + pulsePhase * 0.2f), radius = dotRadius, center = Offset(sx, sy))
 
-                        // Reuse cached Paint (textSize/shadow already set before loop)
                         drawContext.canvas.nativeCanvas.apply {
                             val label = if (node.card.prompt.length > 8) node.card.prompt.take(8) + ".." else node.card.prompt
                             drawText(label, sx, sy + baseRadius + 16f * scale, labelPaint)
@@ -240,13 +243,13 @@ fun MapScreen(
                             Spacer(modifier = Modifier.height(12.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 OutlinedButton(onClick = { viewModel.focusNode(node.card.id) }) {
-                                    Text("\u4ee5\u6b64\u4e3a\u4e2d\u5fc3", color = TextSecondary)
+                                    Text("以此为中心", color = TextSecondary)
                                 }
                                 Button(
                                     onClick = { appNavState.navigate(DetailRoutes.cardDetail(node.card.id), IncomingFrom.BOTTOM) },
                                     colors = ButtonDefaults.buttonColors(containerColor = Primary)
                                 ) {
-                                    Text("\u67e5\u770b\u8be6\u60c5")
+                                    Text("查看详情")
                                 }
                             }
                         }
@@ -257,19 +260,64 @@ fun MapScreen(
     }
 }
 
-private fun DrawScope.drawGrid(scale: Float, cx: Float, cy: Float) {
-    val gridSize = 80f * scale
-    val startX = (cx % gridSize) - gridSize
-    val startY = (cy % gridSize) - gridSize
+/**
+ * ★ Canvas 画布风格方格背景
+ * - 白色底色
+ * - 小格线：每 40px 一条淡灰线
+ * - 大格线：每 5 条（200px）一条稍深的线
+ * - 随缩放和平移动态移动，无限延伸
+ */
+private fun DrawScope.drawCanvasGrid(scale: Float, cx: Float, cy: Float) {
+    // 白色画布底
+    drawRect(color = Color.White)
+
+    val smallGrid = 40f * scale
+    val bigEvery = 5 // 每5条小线画一条粗线
+
+    // 淡灰小格线
+    val lightColor = Color(0xFFE8E8E8)
+    // 深灰大格线
+    val heavyColor = Color(0xFFD0D0D0)
+
+    if (smallGrid < 4f) return // 缩太小就不画了
+
+    val startX = (cx % smallGrid) - smallGrid
+    val startY = (cy % smallGrid) - smallGrid
+
+    // 计算格线序号偏移，用于对齐大格线
+    val indexOffsetX = kotlin.math.floor(-cx / smallGrid).toInt()
+    val indexOffsetY = kotlin.math.floor(-cy / smallGrid).toInt()
+
+    // 竖线
+    var ix = 0
     var gx = startX
-    while (gx < size.width + gridSize) {
-        drawLine(BgElevated, Offset(gx, 0f), Offset(gx, size.height), 0.5f)
-        gx += gridSize
+    while (gx < size.width + smallGrid) {
+        val gridIndex = indexOffsetX + ix
+        val isBig = gridIndex % bigEvery == 0
+        drawLine(
+            color = if (isBig) heavyColor else lightColor,
+            start = Offset(gx, 0f),
+            end = Offset(gx, size.height),
+            strokeWidth = if (isBig) 1f else 0.5f
+        )
+        gx += smallGrid
+        ix++
     }
+
+    // 横线
+    var iy = 0
     var gy = startY
-    while (gy < size.height + gridSize) {
-        drawLine(BgElevated, Offset(0f, gy), Offset(size.width, gy), 0.5f)
-        gy += gridSize
+    while (gy < size.height + smallGrid) {
+        val gridIndex = indexOffsetY + iy
+        val isBig = gridIndex % bigEvery == 0
+        drawLine(
+            color = if (isBig) heavyColor else lightColor,
+            start = Offset(0f, gy),
+            end = Offset(size.width, gy),
+            strokeWidth = if (isBig) 1f else 0.5f
+        )
+        gy += smallGrid
+        iy++
     }
 }
 
@@ -290,10 +338,10 @@ private fun relationGlowColor(type: RelationType): Color = when (type) {
 }
 
 private fun relationLabel(type: RelationType): String = when (type) {
-    RelationType.REQUIRES -> "\u524d\u7f6e"
-    RelationType.EQUIVALENT -> "\u7b49\u4ef7"
-    RelationType.FAILS_WHEN -> "\u5931\u6548"
-    RelationType.WORKFLOW -> "\u6d41\u7a0b"
-    RelationType.CONTRADICTS -> "\u4e92\u65a5"
-    RelationType.EXTENDS -> "\u6269\u5c55"
+    RelationType.REQUIRES -> "前置"
+    RelationType.EQUIVALENT -> "等价"
+    RelationType.FAILS_WHEN -> "失效"
+    RelationType.WORKFLOW -> "流程"
+    RelationType.CONTRADICTS -> "互斥"
+    RelationType.EXTENDS -> "扩展"
 }

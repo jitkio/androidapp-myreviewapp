@@ -1,6 +1,7 @@
 ﻿package com.app.knowledgegraph.data.db
 
 import com.app.knowledgegraph.data.db.entity.*
+import com.app.knowledgegraph.data.preferences.SettingsDataStore
 import com.app.knowledgegraph.data.repository.CardRepository
 import com.app.knowledgegraph.data.repository.GraphRepository
 import com.app.knowledgegraph.data.repository.QuestionBankRepository
@@ -10,10 +11,17 @@ object DatabaseSeeder {
     suspend fun seedIfEmpty(
         cardRepository: CardRepository,
         graphRepository: GraphRepository,
-        questionBankRepository: QuestionBankRepository
+        questionBankRepository: QuestionBankRepository,
+        settingsDataStore: SettingsDataStore
     ) {
-        // 只要数据库中已有任意卡片，就不再插入默认数据
-        if (cardRepository.getCount() > 0) return
+        // ★ 用 DataStore 标记，只执行一次，删完卡片后不会再重新插入
+        if (settingsDataStore.hasSeeded()) return
+
+        // 如果数据库已有数据（比如从旧版升级），也标记为已完成
+        if (cardRepository.getCount() > 0) {
+            settingsDataStore.markSeeded()
+            return
+        }
 
         val cardIds = mutableListOf<Long>()
 
@@ -230,7 +238,6 @@ object DatabaseSeeder {
                 "- 电流源串联任何元件：支路电流=Is"
         ))
 
-        // 建立连接关系
         graphRepository.addEdge(cardIds[1], cardIds[2], RelationType.EQUIVALENT, "戴维南和诺顿互为对偶")
         graphRepository.addEdge(cardIds[4], cardIds[1], RelationType.WORKFLOW, "源变换是求戴维南的中间步骤")
         graphRepository.addEdge(cardIds[1], cardIds[3], RelationType.REQUIRES, "最大功率需先求戴维南等效")
@@ -242,8 +249,10 @@ object DatabaseSeeder {
         graphRepository.addEdge(cardIds[9], cardIds[6], RelationType.WORKFLOW, "速查表指导选网孔法")
         graphRepository.addEdge(cardIds[9], cardIds[1], RelationType.WORKFLOW, "速查表指导选戴维南")
 
-        // 创建默认"电路"题库文件夹
         seedDefaultFolders(questionBankRepository)
+
+        // ★ 标记已完成种子数据，以后永不再插入
+        settingsDataStore.markSeeded()
     }
 
     suspend fun seedDefaultFolders(questionBankRepository: QuestionBankRepository) {

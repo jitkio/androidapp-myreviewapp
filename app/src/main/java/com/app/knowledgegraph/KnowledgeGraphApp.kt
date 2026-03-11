@@ -22,7 +22,8 @@ class KnowledgeGraphApp : Application() {
             DatabaseSeeder.seedIfEmpty(
                 container.cardRepository,
                 container.graphRepository,
-                container.questionBankRepository
+                container.questionBankRepository,
+                container.settingsDataStore
             )
         }
     }

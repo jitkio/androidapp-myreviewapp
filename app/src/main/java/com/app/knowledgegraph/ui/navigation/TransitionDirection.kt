@@ -1,4 +1,4 @@
-package com.app.knowledgegraph.ui.navigation
+﻿package com.app.knowledgegraph.ui.navigation
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -19,42 +19,103 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.app.knowledgegraph.ui.theme.AnimationDuration
 import com.app.knowledgegraph.ui.theme.AnimationEasing
+import com.app.knowledgegraph.ui.theme.AnimationParams
 
 enum class IncomingFrom {
     LEFT, TOP, RIGHT, BOTTOM, NONE
 }
 
-private fun tweenOffset() =
-    tween<IntOffset>(durationMillis = AnimationDuration.pageTransition, easing = AnimationEasing.easeOut)
+/* ── tween 工具 ───────────────────────────────────── */
 
-private fun tweenFloat() =
-    tween<Float>(durationMillis = AnimationDuration.pageTransition, easing = AnimationEasing.easeOut)
+private fun slideEnter() = tween<IntOffset>(
+    durationMillis = AnimationDuration.pageTransition,
+    easing = AnimationEasing.emphasizedDecelerate
+)
+
+private fun slideExit() = tween<IntOffset>(
+    durationMillis = AnimationDuration.pageTransition,
+    easing = AnimationEasing.emphasizedAccelerate
+)
+
+private fun tabSlideEnter() = tween<IntOffset>(
+    durationMillis = AnimationDuration.tabSwitch,
+    easing = AnimationEasing.emphasizedDecelerate
+)
+
+private fun tabSlideExit() = tween<IntOffset>(
+    durationMillis = AnimationDuration.tabSwitch,
+    easing = AnimationEasing.emphasizedAccelerate
+)
+
+private fun fadeSpec(durationMs: Int) = tween<Float>(
+    durationMillis = durationMs,
+    easing = AnimationEasing.easeOut
+)
+
+/* ─────────────────────────────────────────────────────
+   核心思路：
+   - 新页面完整滑入（100%），覆盖旧页面
+   - 旧页面只做 30% 的反向视差偏移，产生"被推开"的感觉
+   - 返回时反过来：当前页面完整滑出，底下的页面从 30% 偏移恢复
+   ───────────────────────────────────────────────────── */
+
+/* ── 前进：新页面进入 ─────────────────────────────── */
 
 fun IncomingFrom.forwardEnter(): EnterTransition = when (this) {
-    IncomingFrom.LEFT -> slideInHorizontally(tweenOffset()) { -it }
-    IncomingFrom.RIGHT -> slideInHorizontally(tweenOffset()) { it }
-    IncomingFrom.TOP -> slideInVertically(tweenOffset()) { -it }
-    IncomingFrom.BOTTOM -> slideInVertically(tweenOffset()) { it }
+    IncomingFrom.LEFT -> slideInHorizontally(tabSlideEnter()) { -it } +
+            fadeIn(fadeSpec(150), initialAlpha = 0.85f)
+    IncomingFrom.RIGHT -> slideInHorizontally(tabSlideEnter()) { it } +
+            fadeIn(fadeSpec(150), initialAlpha = 0.85f)
+    IncomingFrom.TOP -> slideInVertically(slideEnter()) { -it } +
+            fadeIn(fadeSpec(150), initialAlpha = 0.85f)
+    IncomingFrom.BOTTOM -> slideInVertically(slideEnter()) { it } +
+            fadeIn(fadeSpec(150), initialAlpha = 0.85f)
     IncomingFrom.NONE -> EnterTransition.None
 }
+
+/* ── 前进：旧页面退出（视差，只移 30%）──────────── */
 
 fun IncomingFrom.forwardExit(): ExitTransition = when (this) {
+    IncomingFrom.LEFT -> slideOutHorizontally(tabSlideExit()) { (it * AnimationParams.parallaxExitRatio).toInt() } +
+            fadeOut(fadeSpec(AnimationDuration.tabSwitch), targetAlpha = 0.7f)
+    IncomingFrom.RIGHT -> slideOutHorizontally(tabSlideExit()) { (-it * AnimationParams.parallaxExitRatio).toInt() } +
+            fadeOut(fadeSpec(AnimationDuration.tabSwitch), targetAlpha = 0.7f)
+    IncomingFrom.TOP -> slideOutVertically(slideExit()) { (it * AnimationParams.parallaxExitRatio).toInt() } +
+            fadeOut(fadeSpec(AnimationDuration.pageTransition), targetAlpha = 0.7f)
+    IncomingFrom.BOTTOM -> slideOutVertically(slideExit()) { (-it * AnimationParams.parallaxExitRatio).toInt() } +
+            fadeOut(fadeSpec(AnimationDuration.pageTransition), targetAlpha = 0.7f)
     IncomingFrom.NONE -> ExitTransition.None
-    else -> fadeOut(animationSpec = tweenFloat(), targetAlpha = 0.9f)
 }
+
+/* ── 返回：底层页面恢复（从 30% 偏移滑回来）─────── */
 
 fun IncomingFrom.popEnter(): EnterTransition = when (this) {
+    IncomingFrom.LEFT -> slideInHorizontally(tabSlideEnter()) { (it * AnimationParams.parallaxExitRatio).toInt() } +
+            fadeIn(fadeSpec(AnimationDuration.tabSwitch), initialAlpha = 0.7f)
+    IncomingFrom.RIGHT -> slideInHorizontally(tabSlideEnter()) { (-it * AnimationParams.parallaxExitRatio).toInt() } +
+            fadeIn(fadeSpec(AnimationDuration.tabSwitch), initialAlpha = 0.7f)
+    IncomingFrom.TOP -> slideInVertically(slideEnter()) { (it * AnimationParams.parallaxExitRatio).toInt() } +
+            fadeIn(fadeSpec(AnimationDuration.pageTransition), initialAlpha = 0.7f)
+    IncomingFrom.BOTTOM -> slideInVertically(slideEnter()) { (-it * AnimationParams.parallaxExitRatio).toInt() } +
+            fadeIn(fadeSpec(AnimationDuration.pageTransition), initialAlpha = 0.7f)
     IncomingFrom.NONE -> EnterTransition.None
-    else -> fadeIn(animationSpec = tweenFloat(), initialAlpha = 0.9f)
 }
 
+/* ── 返回：当前页面完整滑出 ──────────────────────── */
+
 fun IncomingFrom.popExit(): ExitTransition = when (this) {
-    IncomingFrom.LEFT -> slideOutHorizontally(tweenOffset()) { -it }
-    IncomingFrom.RIGHT -> slideOutHorizontally(tweenOffset()) { it }
-    IncomingFrom.TOP -> slideOutVertically(tweenOffset()) { -it }
-    IncomingFrom.BOTTOM -> slideOutVertically(tweenOffset()) { it }
+    IncomingFrom.LEFT -> slideOutHorizontally(tabSlideExit()) { -it } +
+            fadeOut(fadeSpec(200), targetAlpha = 0.85f)
+    IncomingFrom.RIGHT -> slideOutHorizontally(tabSlideExit()) { it } +
+            fadeOut(fadeSpec(200), targetAlpha = 0.85f)
+    IncomingFrom.TOP -> slideOutVertically(slideExit()) { -it } +
+            fadeOut(fadeSpec(200), targetAlpha = 0.85f)
+    IncomingFrom.BOTTOM -> slideOutVertically(slideExit()) { it } +
+            fadeOut(fadeSpec(200), targetAlpha = 0.85f)
     IncomingFrom.NONE -> ExitTransition.None
 }
+
+/* ── 页面边缘阴影 ─────────────────────────────────── */
 
 fun Modifier.pageEdgeShadow(direction: IncomingFrom): Modifier = this.drawWithContent {
     drawContent()
