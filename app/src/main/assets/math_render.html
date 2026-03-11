@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,system-ui,sans-serif;font-size:16px;line-height:1.7;
+color:#1a1a1a;padding:8px 4px;word-wrap:break-word;background:transparent}
+.katex{font-size:1.1em}
+.katex-display{margin:8px 0;overflow-x:auto;overflow-y:hidden}
+.option-item{margin:2px 0}
+.figure-container{text-align:center;margin:12px 0}
+.figure-container svg{max-width:100%;height:auto}
+</style>
+</head>
+<body>
+<div id="content"></div>
+<script>
+function setContent(html){
+  var el=document.getElementById('content');
+  el.innerHTML=html;
+  if(window.renderMathInElement){
+    renderMathInElement(el,{
+      delimiters:[
+        {left:'$$',right:'$$',display:true},
+        {left:'$',right:'$',display:false},
+        {left:'\\(',right:'\\)',display:false},
+        {left:'\\[',right:'\\]',display:true}
+      ],
+      throwOnError:false
+    });
+  }
+  setTimeout(function(){
+    var h=document.body.scrollHeight;
+    if(window.AndroidBridge){window.AndroidBridge.onHeightChanged(h)}
+  },100);
+}
+</script>
+</body>
+</html>
