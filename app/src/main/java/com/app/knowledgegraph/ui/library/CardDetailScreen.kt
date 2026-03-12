@@ -27,6 +27,8 @@ import com.app.knowledgegraph.data.db.entity.ReviewStatus
 import com.app.knowledgegraph.ui.components.MathView
 import com.app.knowledgegraph.data.db.entity.Edge
 import com.app.knowledgegraph.ui.theme.*
+import com.app.knowledgegraph.ui.components.TtsButton
+import com.app.knowledgegraph.ui.components.shouldShowTts
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -179,7 +181,16 @@ fun CardDetailScreen(
             }
 
             /* ═══ 问题（Prompt）— 醒目卡片 ═══ */
-            SectionHeader(icon = Icons.Default.HelpOutline, title = "问题")
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                SectionHeader(icon = Icons.Default.HelpOutline, title = "问题")
+                if (shouldShowTts(currentCard.chapter, currentCard.prompt)) {
+                    TtsButton(text = currentCard.prompt, iconSize = 22.dp)
+                }
+            }
             if (isEditMode) {
                 OutlinedTextField(value = editPrompt, onValueChange = { editPrompt = it },
                     label = { Text("问题 (Prompt)") }, modifier = Modifier.fillMaxWidth(), minLines = 2)
@@ -415,3 +426,4 @@ private fun reviewStatusColor(status: ReviewStatus): Color = when (status) {
     ReviewStatus.REVIEW -> Secondary
     ReviewStatus.RELEARNING -> Error
 }
+
